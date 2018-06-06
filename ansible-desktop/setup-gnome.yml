@@ -1,0 +1,83 @@
+---
+
+- name: Setup ubuntu-desktop
+  hosts: localhost
+  become_user: root
+  gather_facts: true
+  tasks:
+
+  - name: update gnome dconf settings
+    dconf:
+      key: "{{item.key}}"
+      value: "{{item.value}}"
+    loop:
+      - {key: '/org/gnome/desktop/input-sources/xkb-options', value: "['caps:ctrl_modifier']"}
+      - {key: '/org/gnome/desktop/interface/clock-show-date', value: 'true'}
+      - {key: '/org/gnome/desktop/interface/cursor-blink', value: 'false'}
+      - {key: '/org/gnome/desktop/interface/gtk-theme', value: "'Adwaita-dark'"}
+      - {key: '/org/gnome/desktop/privacy/old-files-age', value: 'uint32 7'}
+      - {key: '/org/gnome/desktop/privacy/remove-old-trash-files', value: 'true'}
+      - {key: '/org/gnome/desktop/privacy/report-technical-problems', value: 'false'}
+      - {key: '/org/gnome/desktop/search-providers/disable-external', value: 'true'}
+      - {key: '/org/gnome/desktop/wm/preferences/audible-bell', value: 'false'}
+      - {key: '/org/gnome/desktop/wm/preferences/focus-mode', value: "'sloppy'"}
+      - {key: '/org/gnome/settings-daemon/plugins/color/night-light-enabled', value: 'false'}
+      - {key: '/org/gnome/settings-daemon/plugins/xsettings/antialiasing', value: "'rgba'"}
+      - {key: '/org/gnome/shell/disable-user-extensions', value: 'true'}
+      - {key: '/org/gnome/software/allow-updates', value: 'false'}
+      - {key: '/org/gnome/software/download-updates', value: 'false'}
+      - {key: '/org/gnome/terminal/legacy/default-show-menubar', value: 'false'}
+
+  - name: apt-remove crap
+    become: true
+    apt:
+      name: "{{ item }}"
+      state: absent
+    with_items:
+    - cheese
+    - evolution
+    - evolution-ews
+    - evolution-help
+    - gnome-boxes
+    - gnome-calendar
+    - gnome-contacts
+    - gnome-dictionary
+    - gnome-documents
+    - gnome-getting-started-docs
+    - gnome-initial-setup
+    - gnome-maps
+    - gnome-online-miners
+    - gnome-photos
+    - gnome-software
+    - gnome-user-docs
+    - gnome-user-share
+    - gnome-video-effects
+    - gnome-weather
+    - simple-scan
+    - totem
+    - tracker-miners
+    - yelp
+
+
+  - name: ensure core gnome packages are installed
+    become: true
+    apt:
+      name: "{{ item }}"
+      state: present
+    with_items:
+    - eog
+    - evince
+    - evolution-data-server
+    - flatpak
+    - gnome-keyring
+    - gnome-menus
+    - gnome-screenshot
+    - gnome-shell
+    - gnome-terminal
+    - gnome-tweaks
+    - nautilus
+
+  - name: remove tracker databases
+    file:
+      name: ~/.cache/tracker
+      state: absent
